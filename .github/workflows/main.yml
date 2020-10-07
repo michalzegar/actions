@@ -1,0 +1,13 @@
+name: Bump version
+on: [ push ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        fetch-depth: '0'
+    - name: Michal Zegar test
+      uses: michalzegar/actions@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
