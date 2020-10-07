@@ -1,0 +1,16 @@
+name: 'Github Tag Action with Datatimestamp'
+description: 'Bump and push git tag on merge. Based on Nick Sjostrom solution, additionally datatimestamp in the tag.'
+author: 'Michal Zegar'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+outputs:
+  new_tag:
+    description: 'New tag generated'
+  tag:
+    description: 'The latest tag after running this action'
+  part:
+    description: 'The part of version which was bumped'
+branding:
+  icon: 'git-merge'  
+  color: 'blue'
