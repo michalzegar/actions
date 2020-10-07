@@ -4,20 +4,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - name: Run Checkout Action
+      uses: actions/checkout@master
       with:
         fetch-depth: '0'
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
-#     - name: Generate build number 
-#       id: buildnumber
-#       uses: einaregilsson/build-number@v2 
-#       with:
-#         token: ${{secrets.github_token}}
-    - name: Michal Zegar test
+    - name: Tag commit with datastamp-build number
       uses: michalzegar/actions@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
-        CUSTOM_TAG: -${{ steps.date.outputs.date }}.${{ github.run_number }} #${{ steps.buildnumber.outputs.build_number }}
+        CUSTOM_TAG: -${{ steps.date.outputs.date }}.${{ github.run_number }}
