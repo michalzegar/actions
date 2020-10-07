@@ -10,14 +10,16 @@ jobs:
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
-    - name: Generate build number 
-      id: buildnumber
-      uses: einaregilsson/build-number@v2 
-      with:
-        token: ${{secrets.github_token}}
+#     - name: Generate build number 
+#       id: buildnumber
+#       uses: einaregilsson/build-number@v2 
+#       with:
+#         token: ${{secrets.github_token}}
     - name: Michal Zegar test
       uses: michalzegar/actions@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
-        CUSTOM_TAG: -${{ steps.date.outputs.date }}.${{ steps.buildnumber.outputs.build_number }}
+         CUSTOM_TAG: -${{ steps.date.outputs.date }}.${{ github.run_number }}
+         
+#${{ steps.buildnumber.outputs.build_number }}
