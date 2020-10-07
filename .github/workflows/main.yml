@@ -11,3 +11,4 @@ jobs:
       uses: michalzegar/actions@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
