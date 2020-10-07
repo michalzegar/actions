@@ -116,7 +116,7 @@ fi
 
 if [ ! -z $custom_tag ]
 then
-    new="$custom_tag"
+    new+="$custom_tag"
 fi
 
 if $pre_release
@@ -130,7 +130,7 @@ fi
 echo ::set-output name=new_tag::$new
 echo ::set-output name=part::$part
 
-# use dry run to determine the next tag
+# use dry run to determine the next tag
 if $dryrun
 then
     echo ::set-output name=tag::$tag
@@ -153,7 +153,6 @@ git_refs_response=$(
 curl -s -X POST $git_refs_url \
 -H "Authorization: token $GITHUB_TOKEN" \
 -d @- << EOF
-
 {
   "ref": "refs/tags/$new",
   "sha": "$commit"
