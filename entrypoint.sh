@@ -28,7 +28,10 @@ git fetch --tags
 tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-)
 tag_commit=$(git rev-list -n 1 $tag)
 
-echo $tag
+echo "This is old tag: $tag"
+tag="${tag%%-*}"
+echo "This is version number: $tag"
+
 last_major=$(semver get major $tag)
 last_minor=$(semver get minor $tag)
 last_patch=$(semver get patch $tag)
@@ -55,7 +58,6 @@ else
 fi
 
 echo $log
-
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch
 case "$log" in
@@ -95,7 +97,7 @@ fi
 
 if [ ! -z $custom_tag ]
 then
-    new="${new%-*}"
+    #new="${new%%-*}"
     new+="$custom_tag"
 fi
 
