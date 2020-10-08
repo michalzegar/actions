@@ -29,12 +29,16 @@ tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/ta
 tag_commit=$(git rev-list -n 1 $tag)
 
 echo "This is old tag: $tag"
-tag="${tag%%-*}"
-echo "This is version number: $tag"
+tagnew="${tag%%-*}"
+echo "This is version number: $tagnew"
 
 last_major=$(semver get major $tag)
 last_minor=$(semver get minor $tag)
 last_patch=$(semver get patch $tag)
+
+# last_major=$(semver get major $tag)
+# last_minor=$(semver get minor $tag)
+# last_patch=$(semver get patch $tag)
 echo ::set-output name=last_major::$last_major
 echo ::set-output name=last_minor::$last_minor
 echo ::set-output name=last_patch::$last_patch
@@ -62,20 +66,20 @@ echo $log
 # supports #major, #minor, #patch
 case "$log" in
     *#major* ) 
-        new=$(semver bump major $tag)
+        new=$(semver bump major $tagnew)
         bump_ver="major"
         ;;
     *#minor* ) 
-        new=$(semver bump minor $tag)
+        new=$(semver bump minor $tagnew)
         bump_ver="minor"
         ;;
     *#patch* ) 
-        new=$(semver bump patch $tag)
+        new=$(semver bump patch $tagnew)
         bump_ver="patch"
         ;;
     * )
         echo "This commit message doesn't include #major, #minor or #patch. Skipping the tag creation..."
-        echo ::set-output name=last_tag::$tag
+        echo ::set-output name=last_tag::$tagnew
         exit 0
         ;;
 esac
@@ -97,7 +101,7 @@ fi
 
 if [ ! -z $custom_tag ]
 then
-    #new="${new%%-*}"
+    new="${new%%-*}"
     new+="$custom_tag"
 fi
 
