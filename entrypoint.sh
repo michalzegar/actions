@@ -104,7 +104,6 @@ fi
 
 echo $part
 
-
 # did we get a new tag?
 if [ ! -z "$new" ]
 then
