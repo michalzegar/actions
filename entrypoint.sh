@@ -59,7 +59,7 @@ else
     log=$(git log $tag..HEAD --pretty=oneline)
 fi
 
-echo $log
+#echo $log
 
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch
