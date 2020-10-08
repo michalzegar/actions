@@ -37,9 +37,9 @@ echo ::set-output name=last_major::$last_major
 echo ::set-output name=last_minor::$last_minor
 echo ::set-output name=last_patch::$last_patch
 
-echo last_major
-echo last_minor
-echo last_patch
+echo $last_major
+echo $last_minor
+echo $last_patch
 
 # get current commit hash for tag
 commit=$(git rev-parse HEAD)
@@ -108,6 +108,10 @@ echo "new: $new"
 major=$(semver get major $new)
 minor=$(semver get minor $new)
 patch=$(semver get patch $new)
+
+echo $major
+echo $minor
+echo $patch
 
 # set outputs
 echo ::set-output name=last_tag::$tag
