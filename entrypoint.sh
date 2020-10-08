@@ -116,12 +116,12 @@ fi
 
 if [ ! -z $custom_tag ]
 then
-    new+="$custom_tag"
+    new="$new$custom_tag"
 fi
 
 if $pre_release
 then
-    echo -e "Bumping tag ${pre_tag}. \n\tNew tag ${new}"
+    echo -e "Bumping pre-release tag ${pre_tag}. \n\tNew tag ${new}"
 else
     echo -e "Bumping tag ${tag}. \n\tNew tag ${new}"
 fi
