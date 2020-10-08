@@ -83,6 +83,8 @@ case "$log" in
         ;;
 esac
 
+echo "new: $new"
+
 # did we get a new tag?
 if [ ! -z "$new" ]
 then
@@ -100,7 +102,7 @@ fi
 
 if [ ! -z $custom_tag ]
 then
-    new="${new%%-*}"
+    #new="${new%%-*}"
     new+="$custom_tag"
 fi
 
