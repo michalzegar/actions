@@ -65,15 +65,15 @@ fi
 # supports #major, #minor, #patch
 case "$log" in
     *#major* ) 
-        new=$(semver bump major $tagnew)
+        new=$(semver bump major $tag)
         bump_ver="major"
         ;;
     *#minor* ) 
-        new=$(semver bump minor $tagnew)
+        new=$(semver bump minor $tag)
         bump_ver="minor"
         ;;
     *#patch* ) 
-        new=$(semver bump patch $tagnew)
+        new=$(semver bump patch $tag)
         bump_ver="patch"
         ;;
     * )
