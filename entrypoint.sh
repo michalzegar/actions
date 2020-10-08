@@ -98,6 +98,7 @@ then
     new+="$custom_tag"
 fi
 
+
 echo $new
 major=$(semver get major $new)
 minor=$(semver get minor $new)
