@@ -1,19 +1,25 @@
 name: Bump version
-on: [ push ]
+
+on:
+  push:
+    branches:
+      - master
+
 jobs:
   build:
+    name: Generate tag
     runs-on: ubuntu-latest
     steps:
-    - name: Run Checkout Action
-      uses: actions/checkout@master
-      with:
-        fetch-depth: '0'
-    - name: Get current date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y%m%d')"
-    - name: Tag commit with datastamp-build number
-      uses: michalzegar/actions@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        WITH_V: true
-        CUSTOM_TAG: -${{ steps.date.outputs.date }}.${{ github.run_number }}
+      - name: Check out code
+        uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      - name: Tag commit with datastamp-build number
+        uses: michalzegar/actions@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          CUSTOM_TAG: -${{ steps.date.outputs.date }}.${{ github.run_number }}
