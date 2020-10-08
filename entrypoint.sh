@@ -95,6 +95,7 @@ fi
 
 if [ ! -z $custom_tag ]
 then
+    new="${new%-*}"
     new+="$custom_tag"
 fi
 
