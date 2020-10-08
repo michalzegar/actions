@@ -28,16 +28,13 @@ git fetch --tags
 tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/tags/[0-9]*.[0-9]*.[0-9]* refs/tags/v[0-9]*.[0-9]*.[0-9]* | cut -d / -f 3-)
 tag_commit=$(git rev-list -n 1 $tag)
 
-echo "This is old tag: $tag"
-tagnew="${tag%%-*}"
-echo "This is version number: $tagnew"
-
-# last_major=$(semver get major $tag)
-# last_minor=$(semver get minor $tag)
-# last_patch=$(semver get patch $tag)
-# echo ::set-output name=last_major::$last_major
-# echo ::set-output name=last_minor::$last_minor
-# echo ::set-output name=last_patch::$last_patch
+echo $tag
+last_major=$(semver get major $tag)
+last_minor=$(semver get minor $tag)
+last_patch=$(semver get patch $tag)
+echo ::set-output name=last_major::$last_major
+echo ::set-output name=last_minor::$last_minor
+echo ::set-output name=last_patch::$last_patch
 
 # get current commit hash for tag
 commit=$(git rev-parse HEAD)
@@ -57,9 +54,7 @@ else
     log=$(git log $tag..HEAD --pretty=oneline)
 fi
 
-# echo "log 1: $log"
-# log="${log%%-*}"
-# echo "log 2: $log"
+echo $log
 
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch
@@ -78,12 +73,10 @@ case "$log" in
         ;;
     * )
         echo "This commit message doesn't include #major, #minor or #patch. Skipping the tag creation..."
-        echo ::set-output name=last_tag::$tagnew
+        echo ::set-output name=last_tag::$tag
         exit 0
         ;;
 esac
-
-echo "new: $new"
 
 # did we get a new tag?
 if [ ! -z "$new" ]
@@ -102,13 +95,10 @@ fi
 
 if [ ! -z $custom_tag ]
 then
-    #new="${new%%-*}"
-    new+="$custom_tag"
+    new="$custom_tag"
 fi
 
-
 echo $new
-
 major=$(semver get major $new)
 minor=$(semver get minor $new)
 patch=$(semver get patch $new)
