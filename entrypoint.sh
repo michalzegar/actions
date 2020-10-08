@@ -108,6 +108,7 @@ fi
 
 
 echo $new
+
 major=$(semver get major $new)
 minor=$(semver get minor $new)
 patch=$(semver get patch $new)
