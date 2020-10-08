@@ -29,8 +29,8 @@ tag=$(git for-each-ref --sort=-v:refname --count=1 --format '%(refname)' refs/ta
 tag_commit=$(git rev-list -n 1 $tag)
 
 echo "This is old tag: $tag"
-# tagnew="${tag%%-*}"
-# echo "This is version number: $tagnew"
+tagnew="${tag%%-*}"
+echo "This is version number: $tagnew"
 
 # last_major=$(semver get major $tag)
 # last_minor=$(semver get minor $tag)
@@ -57,23 +57,23 @@ else
     log=$(git log $tag..HEAD --pretty=oneline)
 fi
 
-echo "log 1: $log"
-log="${log%%-*}"
-echo "log 2: $log"
+# echo "log 1: $log"
+# log="${log%%-*}"
+# echo "log 2: $log"
 
 # get commit logs and determine home to bump the version
 # supports #major, #minor, #patch
 case "$log" in
     *#major* ) 
-        new=$(semver bump major $tag)
+        new=$(semver bump major $tagnew)
         bump_ver="major"
         ;;
     *#minor* ) 
-        new=$(semver bump minor $tag)
+        new=$(semver bump minor $tagnew)
         bump_ver="minor"
         ;;
     *#patch* ) 
-        new=$(semver bump patch $tag)
+        new=$(semver bump patch $tagnew)
         bump_ver="patch"
         ;;
     * )
