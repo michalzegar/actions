@@ -33,13 +33,13 @@ last_major=$(semver get major $tag)
 last_minor=$(semver get minor $tag)
 last_patch=$(semver get patch $tag)
 
-echo last_major
-echo last_minor
-echo last_patch
-
 echo ::set-output name=last_major::$last_major
 echo ::set-output name=last_minor::$last_minor
 echo ::set-output name=last_patch::$last_patch
+
+echo last_major
+echo last_minor
+echo last_patch
 
 # get current commit hash for tag
 commit=$(git rev-parse HEAD)
