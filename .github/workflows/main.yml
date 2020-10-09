@@ -15,8 +15,7 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Tag commit with datastamp-build number
-        uses: ChloePlanet/github-tag-action@master #michalzegar/actions@master
+        uses: michalzegar/actions@master #ChloePlanet/github-tag-action@master #
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
-          ##CUSTOM_TAG: -${{ steps.date.outputs.date }}.${{ github.run_number }}
