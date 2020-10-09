@@ -4,7 +4,7 @@ echo ::set-output name=tag_generated::0
 
 # config
 with_v=${WITH_V:-false}
-release_branches=${RELEASE_BRANCHES:-master}
+release_branches=${RELEASE_BRANCHES:-master,-uat}
 custom_tag=${CUSTOM_TAG}
 source=${SOURCE:-.}
 
