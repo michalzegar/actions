@@ -22,5 +22,5 @@ jobs:
         uses: ./.github/actions/tagRelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_BRANCHES: master, uat
+          RELEASE_BRANCHES: master,uat
           WITH_V: true
