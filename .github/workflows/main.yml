@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Tag commit with datastamp-build number
-        uses: michalzegar/actions@master #ChloePlanet/github-tag-action@master #
+        uses: .github/actions/tagging
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
