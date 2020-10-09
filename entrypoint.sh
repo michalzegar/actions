@@ -45,6 +45,7 @@ if [ -z "$tag" ] || [ "$tag" == "latest" ] || [ "$tag" == "v" ]; then
     tag="0.0.0"
 fi
 
+
 new=$(semver bump $default_semvar_bump $tag);
 
 if [ "$new" != "none" ]; then
