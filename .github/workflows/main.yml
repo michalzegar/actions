@@ -18,7 +18,7 @@ jobs:
       #   id: date
       #   run: echo "::set-output name=date::$(date +'%d%m%Y')"
       - name: Tag commit with datastamp-build number
-        uses: michalzegar/actions@master
+        uses: ChloePlanet/github-tag-action@master #michalzegar/actions@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
