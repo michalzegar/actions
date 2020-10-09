@@ -1,10 +1,13 @@
-name: Bump version
+name: Tag Release CI
 
 on:
   push:
     branches:
       - master
       - uat
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
@@ -15,8 +18,9 @@ jobs:
         uses: actions/checkout@master
         with:
           fetch-depth: '0'
-      - name: Tag commit with datastamp-build number
+      - name: Tag commit
         uses: ./.github/actions/tagRelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_BRANCHES: master,uat
           WITH_V: true
