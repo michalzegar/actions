@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - uat
 
 jobs:
   build:
@@ -15,7 +16,7 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Tag commit with datastamp-build number
-        uses: .github/actions/tagging
+        uses: ./.github/actions/tagRelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
