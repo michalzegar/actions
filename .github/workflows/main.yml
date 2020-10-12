@@ -30,4 +30,4 @@ jobs:
         env:
           target: '${{ github.event.inputs.target }}'
         run: |
-        echo $target
+          echo $target
