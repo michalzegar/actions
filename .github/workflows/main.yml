@@ -33,9 +33,11 @@ jobs:
           case "$target" in
             prod|uat)
               echo "This is $target branch"
+              # Check if tag exists
+              tag=$GITHUB_REF
+              echo $tag
               ;;
             *)
-              echo "Branch name: $target, do not need tag."
-              exit 1
+              echo "Branch name: $target, do not need tag. Continue ..."
               ;;
           esac
