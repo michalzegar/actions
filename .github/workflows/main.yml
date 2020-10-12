@@ -30,7 +30,7 @@ jobs:
         env:
           target: '${{ github.event.inputs.target }}'
         run: |
-          if (( $target == "prod" )) || (( $target == "uat" ))
+          if (( $target -eq "prod" )) || (( $target -eq "uat" ))
           then
              echo "This is $target branch"
           else
