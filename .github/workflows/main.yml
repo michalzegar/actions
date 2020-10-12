@@ -30,4 +30,10 @@ jobs:
         env:
           target: '${{ github.event.inputs.target }}'
         run: |
-          echo $target
+          if (( $target == prod )) || (( $target == uat ))
+          then
+             echo "This is $target branch"
+          else
+             echo "Branch name: $target, do not need tag."
+             exit 1
+          fi
