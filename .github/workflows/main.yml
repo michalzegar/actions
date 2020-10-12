@@ -35,13 +35,12 @@ jobs:
               echo "This is $target branch"
               # Check if tag exists
               tag=$GITHUB_REF
-              if $tag -eq "refs/heads/*"; then
+              if echo $tag | grep "refs/tag/"; then
                 echo "Tag is equal: $tag"
               else
                 echo "Tag does NOT exists, exit scrip" 
                 exit 1
-              fi            
-              #"refs/tag/*"
+              fi
               ;;
             *)
               echo "Branch name: $target, do not need tag. Continue ..."
