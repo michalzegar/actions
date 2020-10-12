@@ -33,10 +33,10 @@ jobs:
           case "$target" in
             prod|uat)
               echo "This is $target branch"
-              
               ### Check if tag exists
               tag=$GITHUB_REF
-              if echo $tag | grep -q "refs/tag/"; then
+              echo $tag
+              if echo $tag | grep -q "refs/heads/"; then
                 echo "Tag is equal: $tag"
               else
                 echo "Tag does NOT exists, exit script !" 
