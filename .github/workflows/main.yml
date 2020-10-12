@@ -1,13 +1,21 @@
 name: Tag Release CI
 
+# on:
+#   push:
+#     branches:
+#       - master
+#       - uat
+#   pull_request:
+#     branches:
+#       - master
+
 on:
-  push:
-    branches:
-      - master
-      - uat
-  pull_request:
-    branches:
-      - master
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deployment target environment'
+        required: true
+        default: 'production'
 
 jobs:
   build:
@@ -18,9 +26,16 @@ jobs:
         uses: actions/checkout@master
         with:
           fetch-depth: '0'
-      - name: Tag commit
-        uses: ./.github/actions/tagRelease
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_BRANCHES: master,uat
-          WITH_V: true
+      - name: Check if tag exists in uat or prod
+        with:
+          target: '${{ github.event.inputs.target }}'
+        run: |
+        echo $target
+        echo ${{ github.event.inputs.target }}
+
+      # - name: Tag commit
+      #   uses: ./.github/actions/tagRelease
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     RELEASE_BRANCHES: master,uat
+      #     WITH_V: true
