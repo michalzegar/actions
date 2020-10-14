@@ -23,13 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4.0.0
+        uses: actions/checkout@master
         with:
           fetch-depth: '0'
 
       - name: Tagging
         id: tagging
-        uses: michalzegar/actions@v4.0.0
+        uses: michalzegar/actions@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
