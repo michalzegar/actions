@@ -26,24 +26,11 @@ jobs:
         uses: actions/checkout@master
         with:
           fetch-depth: '0'
-      - name: Check if tag exists in uat or prod
+      - name: Tagging
+        id: tagging
+        uses: michalzegar/actions@master
         env:
-          target: '${{ github.event.inputs.target }}'
-        run: |
-          case "$target" in
-            prod|uat)
-              echo "This is $target branch"
-              ### Check if tag exists
-              tag=$GITHUB_REF
-              echo $tag
-              if echo $tag | grep -q "refs/heads/"; then
-                echo "Tag is equal: $tag"
-              else
-                echo "Tag does NOT exists, exit script !" 
-                exit 1
-              fi
-              ;;
-            *)
-              echo "Branch name: $target, do not need tag. Continue ..."
-              ;;
-          esac
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+      - name: Output
+        run: echo ${{ steps.tagging.outputs.tag_new }}
