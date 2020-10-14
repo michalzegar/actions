@@ -26,12 +26,14 @@ jobs:
         uses: actions/checkout@master
         with:
           fetch-depth: '0'
+
       - name: Tagging
         id: tagging
-        uses: michalzegar/actions@master
+        uses: michalzegar/actions@v4.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
+
       - name: Output
-        run: echo ${{ steps.tagging.outputs.tag_new }}
+        run: echo ${{ steps.tagging.outputs.new_tag }}
         
