@@ -29,7 +29,7 @@ jobs:
 
       - name: Tagging
         id: tagging
-        uses: michalzegar/actions@master #./.github/workflows/main.yml
+        uses: ./.github/actions/action.yml #michalzegar/actions@master #
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
