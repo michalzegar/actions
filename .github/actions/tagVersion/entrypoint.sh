@@ -125,7 +125,7 @@ git_refs_url=$(jq .repository.git_refs_url $GITHUB_EVENT_PATH | tr -d '"' | sed 
 #echo "$dt: **pushing tag $new to repo $full_name"
 
 echo "Tag new: $new"
-# echo "::set-output name=tag_new::$new" 
+echo "::set-output name=tag_new::$new" 
 # curl -s -X POST $git_refs_url \
 # -H "Authorization: token $GITHUB_TOKEN" \
 # -d @- << EOF
@@ -134,6 +134,5 @@ echo "Tag new: $new"
 #   "ref": "refs/tags/$new",
 #   "sha": "$commit"
 # }
-EOF
+# EOF
 echo ::set-output name=tag_generated::1
-
