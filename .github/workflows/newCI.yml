@@ -1,0 +1,220 @@
+### CI/CD process based on: https://docs.microsoft.com/en-us/azure/aks/kubernetes-action
+name: BeeSafe_CI_CD
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deployment target environment (prod-green/uat/dev-3)"
+        required: true
+        default: dev-3 #"uat"
+env:
+  kubectlVersion: 1.15.0 ### !!!!!!!!!!!!!!!!!!! Nie działa dla 1.17.0 ani 1.17.9 :(
+# on:
+#   # Trigger the workflow on push or pull request
+#   push:
+#     branches:
+#       - master
+#       - uat
+#   pull_request:
+#     branches:
+#       - master
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: "${{ steps.createReleaseAndTag.outputs.tagName }}"
+      credentials: "${{ steps.deploy-env.outputs.deployCredentialFromStep }}"
+      aks-resource-group: "${{ steps.deploy-env.outputs.AKS_RG_NAME }}"
+      aks-cluster-name: "${{ steps.deploy-env.outputs.AKS_CLUSTER_NAME }}"
+    steps:
+      ### Checkout repo to agent host/runner
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        id: checkout
+
+      ### Check if tag got generated
+      - name: Check if tag exist
+        if: github.event.inputs.target == 'prod-green' || github.event.inputs.target == 'prod-blue' || github.event.inputs.target == 'uat'
+        run: |
+          hash=$GITHUB_SHA
+          commitMessage=$(echo `git log --pretty=oneline ${hash} | grep "${hash}"`)
+          echo $commitMessage
+          case $commitMessage in
+            *#major*|*#minor*|*#patch*)
+              echo "'$commitMessage' - contains magic word for tagging :)"
+              ;;
+            *)
+              echo "Tag is necessary for UAT, PROD-GREEN and PROD-BLUE envs ! Use #major/#minor/#patch in commit message to trigger tagging !"
+              exit 1
+              ;;
+          esac
+
+      ### Install a specific version of kubectl binary on the runner
+      - name: Setup Kubectl on host
+        id: installKubectl
+        uses: azure/setup-kubectl@v1
+
+        # with:
+        #   version: $kubectlVersion  # default is latest stable
+      ### Install Helm binaries to use it in next step (create manifest files)
+      - name: Install Helm
+        id: installHelm
+        uses: azure/setup-helm@v1
+
+        # with:
+        #   version: '<version>' # default is latest stable
+      ### Get credential based on environment
+      - name: Get credentials and variables
+        uses: actions/github-script@v2
+        id: deploy-env
+        env:
+          ORG_DIGITAL_DEPLOY_CREDENTIALS: "${{ secrets.ORG_DIGITAL_DEPLOY_CREDENTIALS }}"
+        with:
+          target: "${{ github.event.inputs.target }}"
+          script: |
+            const deployEnvName = core.getInput('target', { required: true }).toUpperCase();
+            const allDeployCredentials = JSON.parse(process.env.ORG_DIGITAL_DEPLOY_CREDENTIALS);
+            const deployCredentials = allDeployCredentials[deployEnvName];
+            if (!deployCredentials) {
+              throw new Error(`Invalid env: ${deployEnvName}`);
+            }
+            core.setOutput('deployCredentialFromStep', deployCredentials.AZURE_CREDENTIALS);
+            core.setOutput('SPN_Secret', deployCredentials.AZURE_CREDENTIALS.clientSecret);
+            core.setOutput('ACR_NAME', deployCredentials.ACR_NAME);
+            core.setOutput('AKS_RG_NAME', deployCredentials.AKS_RG_NAME);
+            core.setOutput('AKS_CLUSTER_NAME', deployCredentials.AKS_CLUSTER_NAME);
+            core.setOutput('SERVICE_NAMESPACE', deployCredentials.SERVICE_NAMESPACE);
+
+      ### Tag Prod/Uat
+      - name: Generate Tag prod/uat
+        if: github.event.inputs.target == 'prod-green' || github.event.inputs.target == 'prod-blue' || github.event.inputs.target == 'uat'
+        id: generateTag
+        uses: ./.github/actions/tagVersion # michalzegar/actions@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+
+      ### Create Release and Tag for other brnaches
+      - name: Create Release and Tag
+        uses: actions/github-script@v2
+        id: createReleaseAndTag
+        with:
+          target: "${{ github.event.inputs.target }}"
+          tag_value: "${{ steps.generateTag.outputs.new_tag }}"
+          description: "${{ github.event.inputs.description }}"
+          github-token: "${{ secrets.ORG_FULL_GITHUB_TOKEN }}"
+          GITHUB_SHA: ${GITHUB_SHA}
+          script: |
+            const deployEnvName = core.getInput('target', { required: true }).toLowerCase();
+            const tag_value = core.getInput('tag_value');
+            const arrayBranchesToTag = [ "prod-green", "prod-blue", "uat" ];
+            const tagDependsOnBranch = arrayBranchesToTag.includes(deployEnvName);
+            if (tagDependsOnBranch) {
+              tag_name = tag_value
+            } else {
+              tag_name = `release__${deployEnvName}__${Date.now()}`
+            }
+            github.repos.createRelease({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               target_commitish: context.sha,
+               tag_name: tag_name,
+               name: `Release: ${deployEnvName} @ ${new Date().toJSON()}`,
+               body: '',
+             });
+            core.setOutput('tagName', tag_name);
+
+      ### Output Tag version to be created in Release
+      - name: Output tag (debug)
+        env:
+          tagName: ${{ steps.createReleaseAndTag.outputs.tagName }}
+        run: echo $tagName
+
+      ### Login to Azure
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ steps.deploy-env.outputs.deployCredentialFromStep }}
+
+      ### Azure Kubernetes Service set context
+      - name: Setup AKS context
+        uses: azure/aks-set-context@v1
+        with:
+          creds: "${{ steps.deploy-env.outputs.deployCredentialFromStep }}"
+          resource-group: "${{ steps.deploy-env.outputs.AKS_RG_NAME }}"
+          cluster-name: "${{ steps.deploy-env.outputs.AKS_CLUSTER_NAME }}"
+
+      ### Login to ACR
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ steps.deploy-env.outputs.ACR_NAME }}.azurecr.io
+          username: ${{ steps.deploy-env.outputs.ACR_NAME }}
+          password: ${{ steps.deploy-env.outputs.SPN_Secret }}
+
+      ### Docker build, tag and push to ACR
+      - name: Docker build
+        env:
+          ACR_NAME: "${{ steps.deploy-env.outputs.ACR_NAME }}"
+          SERVICE_NAMESPACE: "${{ steps.deploy-env.outputs.SERVICE_NAMESPACE }}"
+          NPM_TOKEN: "${{ secrets.ORG_NPM_READ_TOKEN }}"
+          DOCKER_FILE: "./Dockerfile.deploy"
+          SERVICE_NAME: "frontend-portal"
+          IMAGE_TAG: ${{ steps.createReleaseAndTag.outputs.tagName }}
+        run: |
+          ### Create Image repo variable
+          IMAGE_REPOSITORY=${ACR_NAME}.azurecr.io/${SERVICE_NAME}
+          IMG=$IMAGE_REPOSITORY:$IMAGE_TAG
+          LATEST=${IMAGE_REPOSITORY}:latest
+          echo "Image repo with tag is: $IMG "
+          az acr login --name "${ACR_NAME}"
+          docker build -f "${DOCKER_FILE}" --build-arg "NPM_TOKEN=${NPM_TOKEN}" -t $IMG .
+          docker tag $IMG $LATEST
+          docker push $IMAGE_REPOSITORY
+
+  CD:
+    ### Prepare manifest files and deployment YAMLs to AKS Cluster
+    runs-on: ubuntu-latest
+    needs: CI
+    steps:
+      - name: Output (debug)
+        env:
+          tagNameJob: ${{needs.CI.outputs.tag_name}}
+          credentials: ${{needs.CI.outputs.credentials}}
+          aks-resource-group: ${{needs.CI.outputs.aks-resource-group}}
+          aks-cluster-name: ${{needs.CI.outputs.aks-cluster-name}}
+        run: |
+          echo $tagNameJob
+          echo $credentials
+          echo $aks-resource-group
+          echo $aks-cluster-name
+
+# ### HELM TEMPLATE bez install tylko tworzenie manifestów
+#       - name: Helm template render
+#         env:
+#           # SERVICE_NAMESPACE: "${{ steps.deploy-env.outputs.SERVICE_NAMESPACE }}"
+#           SERVICE_NAME: "frontend-portal"
+#           SERVICE_CHART_PATH: "./charts/sky-generic-deployment"
+#           IMAGE_TAG: ${{ steps.tagging.outputs.new_tag }}
+#         run: |
+#           helm template --name $SERVICE_NAME --repo $SERVICE_CHART_PATH \
+#             -f ./config.values.yaml \
+#             --set "image.repository=${IMAGE_REPOSITORY}" \
+#             --set "image.tag=$IMAGE_TAG" \
+#             --set "ingress.annotations.kubernetes\.io\/ingress\.class=${SKY_ENV_public_ingress_class}"
+
+# ####################### MOZNA CANARY / BLUE-GREEN: https://github.com/marketplace/actions/deploy-to-kubernetes-cluster#deployment-strategies---canary-deployment-without-service-mesh
+#       ### Deployment to Kubernetes
+#       - name: Kubernetes deployment
+#         uses: Azure/k8s-deploy@v1
+#         env:
+#           ACR_NAME: "${{ steps.deploy-env.outputs.ACR_NAME }}"
+#           SERVICE_NAME: "frontend-portal"
+#           IMAGE_TAG: ${{ steps.tagging.outputs.new_tag }}
+#         with:
+#         manifests: |
+#           manifests/deployment.yaml         ### dorobic samemu deployment.yml - per service
+#           manifests/service.yaml
+#         images: |
+#           ${ACR_NAME}.azurecr.io/${SERVICE_NAME}:${IMAGE_TAG}
+#         namespace:
+#           "${{ steps.deploy-env.outputs.SERVICE_NAMESPACE }}"
