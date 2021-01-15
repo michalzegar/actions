@@ -1,0 +1,30 @@
+name: 'Git Tag Generator'
+description: 'Generate and push SemVer formatted git tag on push/merge'
+author: 'Michal Zegar'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+outputs:
+  last_tag:
+    description: 'The latest tag before running this action'
+  new_tag:
+    description: 'Newly generated tag'
+  tag_generated:
+    description: '1 if new tag is generated successfully. 0 if no tag is generated'
+  last_major:
+    description: 'The major part of last tag'
+  last_minor:
+    description: 'The minor part of last tag'
+  last_patch:
+    description: 'The patch part of last tag'
+  major:
+    description: 'The major part of new tag'
+  minor:
+    description: 'The minor part of new tag'
+  patch:
+    description: 'The patch part of new tag'
+  bump_ver:
+    description: 'The bump version string e.g. `major`, `minor` or `patch`'
+branding:
+  icon: 'tag'  
+  color: 'blue'
