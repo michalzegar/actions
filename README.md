@@ -1,4 +1,6 @@
-# github-tag-action
+# github-sem-versioning
+
+This is forked from anothrNick repository.
 
 A Github Action to automatically bump and tag master, on merge, with the latest SemVer formatted version.
 
